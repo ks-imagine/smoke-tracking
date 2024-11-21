@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit 14 Smoking Weed</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            text-align: center;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 50px auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        #day-counter {
+            font-size: 48px;
+            margin: 20px 0;
+            color: #007bff;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background: #f9f9f9;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCP9uMzJCpYBM3jfhr9w1syCHPbTYC676s",
+            authDomain: "dank-smells.firebaseapp.com",
+            projectId: "dank-smells",
+            storageBucket: "dank-smells.firebasestorage.app",
+            messagingSenderId: "679912259156",
+            appId: "1:679912259156:web:45ae4785e5d0c03e8f37c1",
+            measurementId: "G-LV0NTHWMVB"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+
+        // Fetch and display the most recent date and calculate the day counter
+        const dateRef = collection(db, 'dates');
+        const q = query(dateRef, orderBy('date', 'desc'), limit(1));
+        getDocs(q).then((querySnapshot) => {
+            if (!querySnapshot.empty) {
+                const mostRecentDate = querySnapshot.docs[0].data().date.toDate();
+                const now = new Date();
+                const diffTime = Math.abs(now - mostRecentDate);
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); // Use Math.floor to count only complete 24-hour periods
+                document.getElementById('day-counter').innerText = diffDays;
+            }
+        });
+
+        // Fetch and display the list of dates
+        const qAll = query(dateRef, orderBy('date', 'desc'));
+        let incidentCount = 0;
+        getDocs(qAll).then((querySnapshot) => {
+            const dateList = document.getElementById('date-list');
+            querySnapshot.forEach((doc) => {
+                const li = document.createElement('li');
+                li.textContent = new Date(doc.data().date.seconds * 1000).toLocaleString();
+                dateList.appendChild(li);
+                incidentCount += 1;
+            });
+            document.getElementById('incident-count').innerText = `Total incidents: ${incidentCount}`;
+        });
+    </script>
+    <div class="container">
+        <h1>Days Since It Last Smelled Like Weed</h1>
+        <div id="day-counter">0</div>
+        <h2>Dates of incidents</h2>
+        <ul id="date-list"></ul>
+        <p id="incident-count"></p>
+    </div>
+</body>
+
+</html>
